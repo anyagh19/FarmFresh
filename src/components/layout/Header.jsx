@@ -19,7 +19,7 @@ function Header() {
   const [villages, setVillages] = useState([]);
   const [open, setOpen] = useState(false);
   const [open1, setOpen1] = useState(false);
-  const [open2, setOpen2] = useState(false)
+  const [open2, setOpen2] = useState(false);
   const logoref = useRef();
   const logoref1 = useRef();
 
@@ -32,12 +32,10 @@ function Header() {
 
   const [showMap, setShowMap] = useState(false);
 
-
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const [role, setRole] = useState('')
-
+  const [role, setRole] = useState('');
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -75,12 +73,10 @@ function Header() {
         const user = await farmerService.getCurrentUser();
         if (user) {
           setIsLoggedIn(true);
-          setRole(user.prefs.role)
+          setRole(user.prefs.role);
         };
-        console.log(user.$id)
         const farmer = await farmerService.getFarmerById(user.$id);
-        setAddress(JSON.parse(farmer.address))
-
+        setAddress(JSON.parse(farmer.address));
       } catch (error) {
         console.error('Not logged in');
       }
@@ -96,18 +92,16 @@ function Header() {
     { name: "My Products", link: '/my-products', active: isLoggedIn && role === 'Farmer' },
     { name: "Weather", link: '/weather', active: isLoggedIn && role === 'Farmer' },
     { name: "Market", link: 'https://agmarknet.gov.in/', active: isLoggedIn && role === 'Farmer', external: true },
-
     { name: 'Logout', link: '/', active: isLoggedIn, logout: true },
     { name: 'Login', link: '/login', active: !isLoggedIn, },
-
-  ]
+  ];
 
   const handleLogout = async () => {
     try {
       await farmerService.logout();
       setIsLoggedIn(false);
       setOpen(false);
-      dispatch(logout())
+      dispatch(logout());
       navigate('/');
     } catch (error) {
       console.error('Logout failed:', error);
@@ -130,9 +124,8 @@ function Header() {
     return () => clearTimeout(delayDebounce);
   }, [searchQuery]);
 
-
   return (
-    <header className="bg-gradient-to-b from-green-500 via-green-300 to-green-300 px-4 py-3  relative">
+    <header className="bg-gradient-to-b from-green-500 via-green-300 to-green-300 px-4 py-3 relative">
       <div className="flex flex-wrap flex-col items-start justify-between gap-2 md:flex-row md:gap-1">
         {/* Logo */}
         <Link to='/'>
@@ -154,7 +147,6 @@ function Header() {
           </span>
           <IoIosArrowDown className="text-lg md:text-xl" />
         </div>
-
 
         {open2 && (
           <div className='bg-gray-200 h-fit p-5 w-[90%] md:w-[40%] absolute top-[120%] left-1/2 transform -translate-x-1/2 rounded-lg shadow-md z-50'>
@@ -270,8 +262,6 @@ function Header() {
           </div>
         )}
 
-
-
         {/* Search */}
         <div className='flex w-full gap-1 md:w-[40%] md:gap-5 relative'>
           <div className="flex items-center flex-grow bg-white border border-gray-300 rounded-lg shadow-sm px-3 py-2">
@@ -299,8 +289,9 @@ function Header() {
                 ))}
               </div>
             )}
-
           </div>
+
+          {/* Menu icon for mobile */}
           <div ref={logoref1} onClick={() => setOpen1(!open1)} className="block md:hidden ">
             <IoMdMenu className='text-2xl' />
           </div>
@@ -312,7 +303,6 @@ function Header() {
               <ul>
                 {isLoggedIn ? (
                   <>
-
                     {menus.map((menu, index) => (
                       menu.active && (
                         <li key={index} onClick={() => setOpen(false)} className="mt-2">
@@ -335,8 +325,6 @@ function Header() {
                         </li>
                       )
                     ))}
-
-
                   </>
                 ) : (
                   <li>
@@ -373,17 +361,6 @@ function Header() {
                 <ul className='cursor-pointer'>
                   {isLoggedIn ? (
                     <>
-                      {/* <li onClick={() => setOpen(false)} className="font-medium">Profile</li>
-                      <li onClick={() => setOpen(false)} className="mt-2">Orders</li>
-                      <li onClick={() => setOpen(false)} className="mt-2">
-                     
-                        <button
-                          className="bg-red-400 py-2 px-4 rounded-full w-full"
-                          onClick={handleLogout}
-                        >
-                          Logout
-                        </button>
-                      </li> */}
                       {menus.map((menu, index) => (
                         menu.active && (
                           <li key={index} onClick={() => setOpen(false)} className="mt-2">
