@@ -5,14 +5,14 @@ import productService from '../../Appwrite/Product'
 import { toast } from 'react-toastify'
 
 function ProductCard({ $id, title, price, photo, farmerID }) {
-    const [role, setRole] = useState('')
+    const [currentUserID, setCurrentUserID] = useState(null)
 
     useEffect(() => {
         const fetchUser = async () => {
             try {
                 const user = await farmerService.getCurrentUser()
                 if (user) {
-                    setRole(user.role)
+                    setCurrentUserID(user.$id)
                 }
             } catch (error) {
                 console.log('card fetch error', error)
@@ -21,26 +21,21 @@ function ProductCard({ $id, title, price, photo, farmerID }) {
         fetchUser()
     }, [])
 
-    const addCart = async (product) => {
+    const addCart = async () => {
         try {
             const userData = await farmerService.getCurrentUser()
-            
-
             const res = await productService.addToCart({
                 productID: $id,
-                userID : userData.$id,
+                userID: userData.$id,
                 name: title,
-                price : price,
-                photo: photo,
-                
+                price,
+                photo,
             })
 
-            if(res){
-                console.log('add secc')
-                toast.success('added to cart', {position: 'top-center'})
-            }
-            else{
-                console.log(error)
+            if (res) {
+                toast.success('Added to cart', { position: 'top-center' })
+            } else {
+                console.log('add failed')
             }
         } catch (error) {
             console.log('card cart error', error)
@@ -49,32 +44,33 @@ function ProductCard({ $id, title, price, photo, farmerID }) {
 
     const productImageUrl = photo
         ? farmerService.getProductFilePreview(photo)
-        : "/default-image.png";
-    
-    // Hide the button if the logged-in user is the farmer of the product
-    const showAddToCartButton = farmerID !== farmerService.getCurrentUser().$id  ;
+        : "/default-image.png"
+
+    const showAddToCartButton = farmerID !== currentUserID
 
     return (
-        
-            <div className='flex flex-col gap-2 '>
-                <Link to={`/product/${$id}`}>
-                <div>
-                    <img src={productImageUrl} alt={title} 
-                        className="w-full h-48 md:h-[300px] object-fill rounded-md" 
-                    />
-                </div>
-                <h3 className='font-medium'>{title}</h3>
-                </Link>
-                <div className=' flex gap-2 items-center md:justify-between'>
-                    <h2 className='font-semibold'>Rs.{price}</h2>
-                    {showAddToCartButton && (
-                        <button onClick={() => addCart({name: title , price , photo})} className='bg-white border-red-200 border-[1.5px] text-red-400 px-3 py-2 rounded-lg font-medium w-[50%]'>
-                            Add 
-                        </button>
-                    )}
-                </div>
+        <div className="bg-white shadow rounded-xl p-3 w-full max-w-xs hover:shadow-lg transition">
+            <Link to={`/product/${$id}`}>
+                <img
+                    src={productImageUrl}
+                    alt={title}
+                    className="w-full h-48 object-cover rounded-md mb-3"
+                />
+                <h3 className="text-base font-semibold text-gray-800 truncate mb-1">{title}</h3>
+            </Link>
+            <div className="flex items-center justify-between">
+                <span className="text-lg font-bold text-green-600">₹{price}</span>
+                {showAddToCartButton && (
+                    <button
+                        onClick={addCart}
+                        className="text-sm font-medium text-white bg-green-500 hover:bg-green-600 px-3 py-1 rounded-md"
+                    >
+                        Add
+                    </button>
+                )}
+                
             </div>
-        
+        </div>
     )
 }
 

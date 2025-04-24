@@ -14,6 +14,11 @@ import Orders from "./components/cart/Orders";
 import Footer from "./components/layout/Footer";
 import About from "./components/Pages/About";
 import WeatherPage from "./components/Pages/WeatherPage";
+import Wishlist from "./components/Pages/Wishlist";
+import AnimateHome from "./components/Pages/AnimateHome";
+import Services from "./components/Pages/Services";
+import ContactUs from "./components/Pages/ContactUs";
+import WhyUs from "./components/Pages/WhyUs";
 
 export  {
     Header,
@@ -31,5 +36,10 @@ export  {
     Orders,
     Footer,
     About,
-    WeatherPage
+    WeatherPage,
+    Wishlist,
+    AnimateHome,
+    Services,
+    ContactUs,
+    WhyUs
 }

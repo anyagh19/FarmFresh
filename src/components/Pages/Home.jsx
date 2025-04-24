@@ -59,7 +59,7 @@ function Home() {
      
   return (
     <div className=' flex flex-col min-h-screen'>
-        <div className='bg-gradient-to-b from-green-300 via-green-200 to-green-100 flex gap-5 px-2 py-3 overflow-y-auto scroll-smooth md:gap-7 md:px-6'>
+        <div className=' bg-gradient-to-b from-green-300 via-green-200 to-green-100 flex gap-5 px-2 py-3 overflow-y-auto scroll-smooth md:gap-7 md:px-6'>
             {menu.map((item) => (
                 <h3 className='text-lg font-medium text-gray-800 cursor-pointer' onClick={() => listCategory(item.name)}>{item.name}</h3>
             ))}

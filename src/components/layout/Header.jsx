@@ -88,6 +88,7 @@ function Header() {
     { name: 'Profile', link: '/profile', active: isLoggedIn, },
     { name: 'Orders', link: '/orders', active: isLoggedIn, },
     { name: 'Cart', link: '/cart', active: isLoggedIn, },
+    { name: 'WishList', link: '/wishlist', active: isLoggedIn, },
     { name: 'Add Product', link: '/add-product', active: isLoggedIn && role === 'Farmer', },
     { name: "My Products", link: '/my-products', active: isLoggedIn && role === 'Farmer' },
     { name: "Weather", link: '/weather', active: isLoggedIn && role === 'Farmer' },
@@ -126,6 +127,30 @@ function Header() {
 
   return (
     <header className="bg-gradient-to-b from-green-500 via-green-300 to-green-300 px-4 py-3 relative">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-5 mb-5 px-4">
+        <div>
+         <Link to='/why-us' >
+         <h2 className="text-lg font-semibold">Why FarmFresh?</h2>
+         </Link>
+        </div>
+
+        <div className="flex flex-col md:flex-row gap-2 md:gap-5 text-sm md:text-base">
+          <Link to='/home' className="md:border-r md:pr-4">
+            <h2>Home</h2>
+          </Link>
+          <Link to='/services' className="md:border-r md:pr-4">
+            <h2>Services</h2>
+          </Link>
+          <Link to='/about' className="md:border-r md:pr-4">
+            <h2>About Us</h2>
+          </Link>
+          <Link to='/contact'>
+            <h2>Contact Us</h2>
+          </Link>
+        </div>
+      </div>
+
+
       <div className="flex flex-wrap flex-col items-start justify-between gap-2 md:flex-row md:gap-1">
         {/* Logo */}
         <Link to='/'>
@@ -239,7 +264,7 @@ function Header() {
                 Save Address
               </button>
               <button
-                onClick={() => setShowMap(true)}
+                onClick={() => setShowMap(!showMap)}
                 className="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 transition-all"
               >
                 Use Current Location
@@ -403,6 +428,7 @@ function Header() {
           </Link>
         </div>
       </div>
+
     </header>
   );
 }

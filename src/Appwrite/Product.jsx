@@ -195,7 +195,83 @@ export class ProductService {
             return [];
           }
       }
+
+      async addToWishlist({productID , userID , name , price , photo}){
+        try {
+            return await this.database.createDocument(
+                conf.appwriteDatabaseID,
+                conf.appwriteWishlistCollectionID,
+                ID.unique(),
+                {
+                    productID,
+                    userID,
+                    name, 
+                    photo , 
+                    price
+                }
+            )
+        } catch (error) {
+            console.log(error)
+        }
+      }
+
+      async getWish(userID){
+        try {
+            return await this.database.listDocuments(
+                conf.appwriteDatabaseID,
+                conf.appwriteWishlistCollectionID,
+                [Query.equal('userID' , userID)]
+            )
+        } catch (error) {
+            console.log('get ord error' ,error)
+        }
+    }
+
+    async deleteWishlistById(documentID) {
+        try {
+          return await this.database.deleteDocument(
+            conf.appwriteDatabaseID,
+            conf.appwriteWishlistCollectionID,
+            documentID
+          )
+        } catch (error) {
+          console.log('deleteWishlistById error:', error)
+          return null
+        }
+      }
+      
     
+      async addReview({productID , userID , rate , view}){
+        try {
+            return this.database.createDocument(
+                conf.appwriteDatabaseID,
+                conf.appwriteReviewsCollectionID,
+                ID.unique(),
+                {
+                    productID,
+                    userID,
+                    rate,
+                    view
+                }
+            )
+        } catch (error) {
+            console.log(error)
+        }
+      }
+
+      async getReviews(productID){
+        try {
+            return this.database.listDocuments(
+                conf.appwriteDatabaseID,
+                conf.appwriteReviewsCollectionID,
+                [
+                    Query.equal('productID', productID)
+                ]
+            )
+        } catch (error) {
+            console.log(error)
+        }
+      }
 }
 
 
