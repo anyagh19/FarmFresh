@@ -19,6 +19,7 @@ import AnimateHome from "./components/Pages/AnimateHome";
 import Services from "./components/Pages/Services";
 import ContactUs from "./components/Pages/ContactUs";
 import WhyUs from "./components/Pages/WhyUs";
+import CommunityPage from "./components/Pages/CommunityPage";
 
 export  {
     Header,
@@ -41,5 +42,6 @@ export  {
     AnimateHome,
     Services,
     ContactUs,
-    WhyUs
+    WhyUs,
+    CommunityPage
 }

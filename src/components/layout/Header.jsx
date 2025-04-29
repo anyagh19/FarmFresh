@@ -12,6 +12,7 @@ import { logout } from '../../store/AuthSlice';
 import { ImCancelCircle } from "react-icons/im";
 import productService from '../../Appwrite/Product';
 import LeafletLocationMap from '../ui/LeafletLocationMap';
+import userService from '../../Appwrite/Customer';
 
 function Header() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -74,21 +75,33 @@ function Header() {
         if (user) {
           setIsLoggedIn(true);
           setRole(user.prefs.role);
-        };
-        const farmer = await farmerService.getFarmerById(user.$id);
-        setAddress(JSON.parse(farmer.address));
+
+          if (user.prefs.role === 'Farmer') {
+            const farmer = await farmerService.getFarmerById(user.$id);
+            if (farmer?.address) {
+              setAddress(JSON.parse(farmer.address));
+            }
+          } else if (user.prefs.role === 'Customer') {
+            const cust = await userService.getCustomerById(user.$id);
+            if (cust?.address) {
+              setAddress(JSON.parse(cust.address));
+            }
+          }
+        }
       } catch (error) {
         console.error('Not logged in');
       }
     };
+
     checkLogin();
   }, []);
 
   const menus = [
-    { name: 'Profile', link: '/profile', active: isLoggedIn, },
+   // { name: 'Profile', link: '/profile', active: isLoggedIn, },
     { name: 'Orders', link: '/orders', active: isLoggedIn, },
     { name: 'Cart', link: '/cart', active: isLoggedIn, },
     { name: 'WishList', link: '/wishlist', active: isLoggedIn, },
+    { name: 'Community', link: '/community', active: isLoggedIn, },
     { name: 'Add Product', link: '/add-product', active: isLoggedIn && role === 'Farmer', },
     { name: "My Products", link: '/my-products', active: isLoggedIn && role === 'Farmer' },
     { name: "Weather", link: '/weather', active: isLoggedIn && role === 'Farmer' },
@@ -129,9 +142,9 @@ function Header() {
     <header className="bg-gradient-to-b from-green-500 via-green-300 to-green-300 px-4 py-3 relative">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-5 mb-5 px-4">
         <div>
-         <Link to='/why-us' >
-         <h2 className="text-lg font-semibold">Why FarmFresh?</h2>
-         </Link>
+          <Link to='/why-us' >
+            <h2 className="text-lg font-semibold">Why FarmFresh?</h2>
+          </Link>
         </div>
 
         <div className="flex flex-col md:flex-row gap-2 md:gap-5 text-sm md:text-base">
@@ -397,9 +410,8 @@ function Header() {
                                 Logout
                               </button>
                             ) : (
-                              <Link to={menu.link}>
-                                <span>{menu.name}</span>
-                              </Link>
+
+                              null
                             )}
                           </li>
                         )
@@ -427,6 +439,13 @@ function Header() {
             </div>
           </Link>
         </div>
+      </div>
+      <div className='flex gap-5 mt-3 font-medium overflow-auto'>
+        {menus.map((item) => (
+          <Link to={item.link}>
+            <h3>{item.name}</h3>
+          </Link>
+        ))}
       </div>
 
     </header>

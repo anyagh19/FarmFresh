@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
-import { About, AnimateHome, Cart, ContactUs, FarmerProducts, Home, LoginForm, Orders, ProductForm, ProductPage, Services, SignUpForm, WeatherPage, WhyUs, Wishlist } from './Index.js'
+import { About, AnimateHome, Cart, CommunityPage, ContactUs, FarmerProducts, Home, LoginForm, Orders, ProductForm, ProductPage, Services, SignUpForm, WeatherPage, WhyUs, Wishlist } from './Index.js'
 import { Provider } from 'react-redux'
 import store from './store/Store.js'
 
@@ -63,6 +63,10 @@ const router = createBrowserRouter([
       {
         path: '/why-us',
         element: <WhyUs />
+      },
+      {
+        path: '/community',
+        element: <CommunityPage />
       }
     ]
   },
