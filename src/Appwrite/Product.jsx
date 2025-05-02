@@ -59,7 +59,7 @@ export class ProductService {
             return this.database.createDocument(
                 conf.appwriteDatabaseID,
                 conf.appwriteCartCollectionID,
-                productID,
+                ID.unique(),
                 {
                     productID,
                     userID,

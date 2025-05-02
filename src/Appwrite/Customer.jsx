@@ -67,6 +67,20 @@ export class UserService {
         }
     }
 
+    async getUserById(userID) {
+        try {
+          return await this.database.getDocument(
+            conf.appwriteDatabaseID,
+            conf.appwriteUserCollectionID,
+            userID
+          )
+        } catch (error) {
+          console.log('get user by id error', error)
+          throw error
+        }
+      }
+      
+
     async getCustomerById(userID){
         try {
             return this.database.getDocument(

@@ -6,6 +6,7 @@ import { toast } from 'react-toastify'
 import Input from '../ui/Input'
 import Select from '../ui/Select'
 import { useForm } from 'react-hook-form'
+import userService from '../../Appwrite/Customer'
 
 function Cart() {
   const [cartProducts, setCartProducts] = useState([])
@@ -23,23 +24,34 @@ function Cart() {
         const userData = await farmerService.getCurrentUser()
         console.log(userData.prefs.role)
         setUID(userData.$id)
-        const response = await farmerService.getFarmerById(userData.$id)
-        console.log(JSON.parse(response.address))
-        setAddress(JSON.parse(response.address))
+  
+        let addressData = null
+  
+        if (userData.prefs.role === 'farmer') {
+          const response = await farmerService.getFarmerById(userData.$id)
+          addressData = JSON.parse(response.address)
+        } else {
+          const response = await userService.getUserById(userData.$id)
+          addressData = JSON.parse(response.address)
+        }
+  
+        setAddress(addressData)
+  
         const res = await productService.getCartProducts(userData.$id)
         if (res.documents && res.documents.length > 0) {
           setCartProducts(res.documents)
-        }
-        else {
+        } else {
           setCartProducts([])
         }
-
+  
       } catch (error) {
         console.log('fetch cart err', error)
       }
     }
+  
     fetchCart()
   }, [])
+  
 
   const remove = async (productID) => {
     try {
