@@ -97,7 +97,7 @@ function Header() {
   }, []);
 
   const menus = [
-   // { name: 'Profile', link: '/profile', active: isLoggedIn, },
+    // { name: 'Profile', link: '/profile', active: isLoggedIn, },
     { name: 'Orders', link: '/orders', active: isLoggedIn, },
     { name: 'Cart', link: '/cart', active: isLoggedIn, },
     { name: 'WishList', link: '/wishlist', active: isLoggedIn, },
@@ -440,13 +440,23 @@ function Header() {
           </Link>
         </div>
       </div>
-      <div className='flex gap-5 mt-3 font-medium overflow-auto'>
-        {menus.map((item) => (
-          <Link to={item.link}>
-            <h3>{item.name}</h3>
-          </Link>
-        ))}
-      </div>
+      {isLoggedIn && (
+        <div className='flex gap-5 mt-3 font-medium overflow-auto'>
+          {menus
+            .filter((item) => item.active)
+            .map((item, idx) => (
+              <Link
+                key={idx}
+                to={item.link}
+                target={item.external ? "_blank" : "_self"}
+                rel={item.external ? "noopener noreferrer" : undefined}
+              >
+                <h3>{item.name}</h3>
+              </Link>
+            ))}
+        </div>
+      )}
+
 
     </header>
   );
