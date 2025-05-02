@@ -17,7 +17,18 @@ export class UserService {
 
     async createUser({ userID = ID.unique(), name, email, phone, password, address, role }) {
         try {
-            // Create a document in the database
+            // 1. Create account first
+            const res = await this.account.create(userID, email, password, name);
+            console.log("Account created:", res);
+    
+            // 2. Create a session immediately after account creation
+            const session = await this.account.createEmailPasswordSession(email, password);
+            console.log("Session created:", session);
+    
+            // 3. (Optional) Save role in prefs
+            await this.account.updatePrefs({ role });
+    
+            // 4. Now you're authenticated – create user document
             const user = await this.database.createDocument(
                 conf.appwriteDatabaseID,
                 conf.appwriteUserCollectionID,
@@ -32,36 +43,15 @@ export class UserService {
                     role
                 }
             );
-
             console.log("Database user created:", user);
-
-            if (!user || !user.$id) {
-                throw new Error("Failed to create user document");
-            }
-
-            // Create an account in Appwrite auth
-            const res = await this.account.create(userID, email, password, name);
-            console.log("Account created:", res);
-
-            if (!res) {
-                throw new Error("Failed to create Appwrite account");
-            }
-
-            // Login after account creation
-            const session = await this.login({ email, password });
-            console.log("Session created:", session);
-
-            if (session) {
-                // Update user's preferences (e.g., role)
-                await this.account.updatePrefs({ role });
-            }
-
-            return { user, session }; // returning both document and session
+    
+            return { user, session };
         } catch (error) {
             console.error("Error creating user:", error);
             throw error;
         }
     }
+    
 
     async login({ email, password }) {
         try {
