@@ -10,6 +10,7 @@ const conf = {
     appwriteWishlistCollectionID : String(import.meta.env.VITE_APPWRITE_WISHLIST_COLLECTION_ID),
     appwriteReviewsCollectionID : String(import.meta.env.VITE_APPWRITE_REVIEWS_COLLECTION_ID),
     appwriteUserCollectionID : String(import.meta.env.VITE_APPWRITE_USER_COLLECTION_ID),
+    appwriteCommunityCollectionID : String(import.meta.env.VITE_APPWRITE_COMMUNITY_COLLECTION_ID),
     WeatherKey : String(import.meta.env.VITE_WEATHER_API_KEY)
 }
 

@@ -80,6 +80,7 @@ export class UserService {
         }
       }
       
+    
 
     async getCustomerById(userID){
         try {
@@ -90,6 +91,17 @@ export class UserService {
             )
         } catch (error) {
             console.error("Error getting farmer by ID:", error)
+        }
+    }
+
+    async listCustomers(){
+        try {
+            return this.database.listDocuments(
+                conf.appwriteDatabaseID,
+                conf.appwriteUserCollectionID
+            )
+        } catch (error) {
+            console.log(error)
         }
     }
 }

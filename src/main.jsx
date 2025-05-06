@@ -6,6 +6,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import { About, AnimateHome, Cart, CommunityPage, ContactUs, FarmerProducts, Home, LoginForm, Orders, ProductForm, ProductPage, Services, SignUpForm, WeatherPage, WhyUs, Wishlist } from './Index.js'
 import { Provider } from 'react-redux'
 import store from './store/Store.js'
+import AdminPage from './components/Pages/AdminPage.jsx'
 
 const router = createBrowserRouter([
   {
@@ -67,6 +68,10 @@ const router = createBrowserRouter([
       {
         path: '/community',
         element: <CommunityPage />
+      },
+      {
+        path: '/admin',
+        element: <AdminPage />
       }
     ]
   },

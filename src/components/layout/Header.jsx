@@ -102,6 +102,7 @@ function Header() {
     { name: 'Cart', link: '/cart', active: isLoggedIn, },
     { name: 'WishList', link: '/wishlist', active: isLoggedIn, },
     { name: 'Community', link: '/community', active: isLoggedIn, },
+    { name: 'Admin', link: '/admin', active: isLoggedIn && role === 'admin', },
     { name: 'Add Product', link: '/add-product', active: isLoggedIn && role === 'Farmer', },
     { name: "My Products", link: '/my-products', active: isLoggedIn && role === 'Farmer' },
     { name: "Weather", link: '/weather', active: isLoggedIn && role === 'Farmer' },

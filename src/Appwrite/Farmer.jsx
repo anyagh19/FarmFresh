@@ -192,6 +192,46 @@ export class FarmerService{
         }
     }
 
+    async createCommunityPost({farmerID , name , photo , story}){
+        try {
+            return await this.database.createDocument(
+                conf.appwriteDatabaseID,
+                conf.appwriteCommunityCollectionID,
+                ID.unique(),
+                {
+                    farmerID,
+                    name ,
+                    photo ,
+                    story
+                }
+            )
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    async listCommunityPosts(){
+        try {
+            return this.database.listDocuments(
+                conf.appwriteDatabaseID,
+                conf.appwriteCommunityCollectionID
+            )
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    async listFarmers(){
+        try {
+            return this.database.listDocuments(
+                conf.appwriteDatabaseID,
+                conf.appwriteFarmersCollectionID
+            )
+        } catch (error) {
+            console.log(error)
+        }
+    }
+    
 }
 
 

@@ -1,79 +1,77 @@
-import React, { useEffect, useState } from 'react'
-import farmerService from '../../Appwrite/Farmer'
-import productService from '../../Appwrite/Product'
-import ProductCard from '../ui/ProductCard'
-import { toast } from 'react-toastify'
-import Input from '../ui/Input'
-import Select from '../ui/Select'
-import { useForm } from 'react-hook-form'
-import userService from '../../Appwrite/Customer'
+import React, { useEffect, useState } from 'react';
+import farmerService from '../../Appwrite/Farmer';
+import productService from '../../Appwrite/Product';
+import ProductCard from '../ui/ProductCard';
+import { toast } from 'react-toastify';
+import userService from '../../Appwrite/Customer';
 
 function Cart() {
-  const [cartProducts, setCartProducts] = useState([])
-  const [address, setAddress] = useState()
+  const [cartProducts, setCartProducts] = useState([]);
+  const [address, setAddress] = useState();
   const [villages, setVillages] = useState([]);
-  const [open, setOpen] = useState(false)
-  
-
-  const { register, handleSubmit } = useForm()
-  const [uID, setUID] = useState()
+  const [open, setOpen] = useState(false);
+  const [uID, setUID] = useState();
+  const [paymentMethod, setPaymentMethod] = useState(null);
+  const [form, setForm] = useState({ name: '', email: '' });
+  const [processing, setProcessing] = useState(false);
 
   useEffect(() => {
     const fetchCart = async () => {
       try {
-        const userData = await farmerService.getCurrentUser()
-        console.log(userData.prefs.role)
-        setUID(userData.$id)
-  
-        let addressData = null
-  
-        if (userData.prefs.role === 'farmer') {
-          const response = await farmerService.getFarmerById(userData.$id)
-          addressData = JSON.parse(response.address)
+        const userData = await farmerService.getCurrentUser();
+        setUID(userData.$id);
+
+        let addressData;
+        if (userData.prefs.role === 'Farmer') {
+          const response = await farmerService.getFarmerById(userData.$id);
+          addressData = JSON.parse(response.address);
         } else {
-          const response = await userService.getUserById(userData.$id)
-          addressData = JSON.parse(response.address)
+          const response = await userService.getUserById(userData.$id);
+          addressData = JSON.parse(response.address);
         }
-  
-        setAddress(addressData)
-  
-        const res = await productService.getCartProducts(userData.$id)
-        if (res.documents && res.documents.length > 0) {
-          setCartProducts(res.documents)
-        } else {
-          setCartProducts([])
-        }
-  
+
+        setAddress(addressData);
+        const res = await productService.getCartProducts(userData.$id);
+        setCartProducts(res.documents || []);
       } catch (error) {
-        console.log('fetch cart err', error)
+        console.log('fetch cart err', error);
       }
-    }
-  
-    fetchCart()
-  }, [])
-  
+    };
+
+    fetchCart();
+  }, []);
+
+  const calculateTotal = () => {
+    const subtotal = cartProducts.reduce((total, item) => total + parseFloat(item.price), 0);
+    return {
+      subtotal,
+      delivery: 50,
+      tax: 20,
+      total: subtotal + 50 + 20
+    };
+  };
 
   const remove = async (productID) => {
     try {
-      const res = await productService.removeFromCart(productID)
-      if (res) {
-        setCartProducts((prev) => prev.filter((product) => product.$id !== productID))
-        toast.info('Removed from cart', { position: 'top-center' })
-      }
+      await productService.removeFromCart(productID);
+      setCartProducts((prev) => prev.filter((p) => p.$id !== productID));
+      toast.info('Removed from cart', { position: 'top-center' });
     } catch (error) {
-      console.log('rem cart er', error)
+      console.log('rem cart err', error);
     }
-  }
+  };
 
-  const calculateTotal = () => {
-    return cartProducts.reduce((total, item) => total + parseFloat(item.price), 0).toFixed(2)
-  }
+  const handlePayment = async () => {
+    if (!form.name || !form.email || !paymentMethod) {
+      toast.error('Please fill all fields and select payment method');
+      return;
+    }
 
-  const addOrder = async () => {
+    setProcessing(true);
     try {
       await Promise.all(
-        cartProducts.map(async (item) => {
-          await productService.addToOrders({
+        cartProducts.map((item) =>
+          productService.addToOrders({
             productID: item.$id,
             userID: uID,
             name: item.name,
@@ -81,20 +79,23 @@ function Cart() {
             photo: item.photo,
             address: JSON.stringify(address)
           })
-        })
-      )
-
-      await productService.removeAllCartProduct(uID)
-      setCartProducts([])
-      toast.success('🎉 Order placed successfully!', { position: 'top-center' })
+        )
+      );
+      await productService.removeAllCartProduct(uID);
+      setCartProducts([]);
+      toast.success('🎉 Payment Successful!', { position: 'top-center' });
     } catch (error) {
-      console.log('but add ord err', error)
+      console.error('Payment error', error);
+      toast.error('Payment Failed. Try again!');
+    } finally {
+      setProcessing(false);
     }
-  }
+  };
 
   return (
-    <div>
-      <div className='grid grid-cols-2 p-3 gap-3 md:grid-cols-5 md:px-6 md:gap-8 pb-5 border-b-2 border-gray-500'>
+    <div className="p-4">
+      {/* Cart Items */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 border-b pb-5">
         {cartProducts.map((product) => (
           <div key={product.$id}>
             <ProductCard
@@ -103,26 +104,34 @@ function Cart() {
               photo={product.photo}
               price={product.price}
             />
-            <button onClick={() => remove(product.$id)} className='px-3 py-2 bg-red-300 rounded-lg font-medium mt-2'>Remove </button>
+            <button onClick={() => remove(product.$id)} className="mt-2 px-3 py-2 bg-red-400 rounded">
+              Remove
+            </button>
           </div>
         ))}
       </div>
 
-      <div className='p-3 flex flex-col gap-5 items-center'>
+      {/* Address Section */}
+      <div className="mt-4 flex flex-col items-center gap-4">
         {address ? (
-          <h2 className='text-xl font-medium'> {address.state} ,{address.district}, {address.taluka} ,{address.village} ,{address.pincode}</h2>
+          <p className="text-lg font-semibold">
+            {address.state}, {address.district}, {address.taluka}, {address.village}, {address.pincode}
+          </p>
         ) : (
-          <h2>Loading address...</h2>
+          <p>Loading address...</p>
         )}
-        <button onClick={() => setOpen(!open)} className='w-[200px] py-2 px-4 rounded-xl bg-red-400 font-medium'>change Address</button>
+        <button onClick={() => setOpen(!open)} className="bg-blue-400 px-4 py-2 rounded text-white">
+          Change Address
+        </button>
       </div>
 
+      {/* Address Form */}
       {open && (
-        <div className='flex flex-col gap-3 px-4 py-2'>
+        <div className="mt-4 space-y-3 px-2">
           <input
-            type='text'
-            placeholder='Enter Pincode'
-            className='px-3 py-2 border rounded'
+            type="text"
+            placeholder="Enter Pincode"
+            className="w-full border p-2 rounded"
             onChange={async (e) => {
               const pin = e.target.value;
               setAddress((prev) => ({ ...prev, pincode: pin }));
@@ -135,8 +144,7 @@ function Cart() {
 
                   if (postOffices.length > 0) {
                     const { State, District, Block } = postOffices[0];
-
-                    const villageList = postOffices.map(po => po.Name);
+                    const villageList = postOffices.map((po) => po.Name);
                     setVillages(villageList);
 
                     setAddress((prev) => ({
@@ -145,8 +153,6 @@ function Cart() {
                       district: District,
                       taluka: Block
                     }));
-                  } else {
-                    setVillages([]);
                   }
                 } catch (err) {
                   console.error("Failed to fetch location:", err);
@@ -157,61 +163,106 @@ function Cart() {
             }}
           />
 
-          {/* Show fetched details */}
-          {address.state && (
-            <div className='text-sm bg-white p-2 rounded'>
-              <p><strong>State:</strong> {address.state}</p>
-              <p><strong>District:</strong> {address.district}</p>
-              <p><strong>Taluka:</strong> {address.taluka}</p>
-            </div>
-          )}
-
-          {/* Village Dropdown */}
           {villages.length > 0 && (
             <select
-              className='px-3 py-2 border rounded'
-              onChange={(e) =>
-                setAddress((prev) => ({ ...prev, village: e.target.value }))
-              }
+              className="w-full border p-2 rounded"
+              onChange={(e) => setAddress((prev) => ({ ...prev, village: e.target.value }))}
             >
               <option value="">Select Village</option>
-              {villages.map((village, idx) => (
-                <option key={idx} value={village}>{village}</option>
+              {villages.map((v, i) => (
+                <option key={i} value={v}>{v}</option>
               ))}
             </select>
           )}
 
-          {/* Local Address */}
           <textarea
-            placeholder='Enter Local Address'
-            className='px-3 py-2 border rounded resize-none'
-            onChange={(e) =>
-              setAddress((prev) => ({ ...prev, localAddress: e.target.value }))
-            }
+            placeholder="Enter Local Address"
+            className="w-full border p-2 rounded"
+            onChange={(e) => setAddress((prev) => ({ ...prev, localAddress: e.target.value }))}
           />
 
-          {/* Submit */}
           <button
-            onClick={() => {
-              console.log("Final Address:", address);
-              setOpen(false);
-            }}
-            className='bg-purple-500 text-white py-2 px-4 rounded hover:bg-purple-600 transition-all mt-2'
+            onClick={() => setOpen(false)}
+            className="bg-green-500 text-white py-2 px-4 rounded"
           >
             Save Address
           </button>
         </div>
       )}
 
-      
-      
+      {/* Payment Section */}
+      <div className="mt-6 max-w-md mx-auto space-y-4">
+        <h2 className="text-xl font-semibold">Payment</h2>
 
-      <div className=' flex justify-between px-8 py-3'>
-        <h2 className='text-xl font-semibold'>Total: Rs.{calculateTotal()}</h2>
-        <button onClick={addOrder} className='py-2 px-4 rounded-xl bg-red-400 font-medium'>Buy</button>
+        <input
+          className="w-full border p-2 rounded"
+          placeholder="Name"
+          value={form.name}
+          onChange={(e) => setForm({ ...form, name: e.target.value })}
+        />
+        <input
+          className="w-full border p-2 rounded"
+          placeholder="Email"
+          value={form.email}
+          onChange={(e) => setForm({ ...form, email: e.target.value })}
+        />
+
+        <div className="flex gap-4">
+          <label>
+            <input
+              type="radio"
+              value="credit-card"
+              checked={paymentMethod === "credit-card"}
+              onChange={(e) => setPaymentMethod(e.target.value)}
+            /> Credit Card
+          </label>
+          <label>
+            <input
+              type="radio"
+              value="upi"
+              checked={paymentMethod === "upi"}
+              onChange={(e) => setPaymentMethod(e.target.value)}
+            /> UPI
+          </label>
+          <label>
+            <input
+              type="radio"
+              value="cod"
+              checked={paymentMethod === "cod"}
+              onChange={(e) => setPaymentMethod(e.target.value)}
+            /> COD
+          </label>
+        </div>
+
+        {/* Dynamic Inputs Based on Payment Method */}
+        {paymentMethod === "credit-card" && (
+          <div className="space-y-2">
+            <input className="w-full border p-2 rounded" placeholder="Card Number" />
+            <input className="w-full border p-2 rounded" placeholder="Expiry (MM/YY)" />
+            <input className="w-full border p-2 rounded" placeholder="CVV" />
+          </div>
+        )}
+        {paymentMethod === "upi" && (
+          <input className="w-full border p-2 rounded" placeholder="UPI ID (e.g. name@upi)" />
+        )}
+        {paymentMethod === "cod" && (
+          <p className="text-green-600">Cash will be collected at delivery.</p>
+        )}
+
+        <div className="text-lg font-bold">
+          Total: ₹{calculateTotal().total.toFixed(2)}
+        </div>
+
+        <button
+          onClick={handlePayment}
+          className={`w-full py-2 rounded ${processing ? 'bg-gray-400' : 'bg-green-500 hover:bg-green-600'} text-white`}
+          disabled={processing}
+        >
+          {processing ? "Processing..." : "Complete Payment"}
+        </button>
       </div>
     </div>
-  )
+  );
 }
 
-export default Cart
+export default Cart;
