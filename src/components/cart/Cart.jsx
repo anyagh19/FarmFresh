@@ -14,6 +14,7 @@ function Cart() {
   const [paymentMethod, setPaymentMethod] = useState(null);
   const [form, setForm] = useState({ name: '', email: '' });
   const [processing, setProcessing] = useState(false);
+  const [showPaymentForm, setShowPaymentForm] = useState(false);
 
   useEffect(() => {
     const fetchCart = async () => {
@@ -84,6 +85,7 @@ function Cart() {
       await productService.removeAllCartProduct(uID);
       setCartProducts([]);
       toast.success('🎉 Payment Successful!', { position: 'top-center' });
+      setShowPaymentForm(false);
     } catch (error) {
       console.error('Payment error', error);
       toast.error('Payment Failed. Try again!');
@@ -190,77 +192,97 @@ function Cart() {
         </div>
       )}
 
-      {/* Payment Section */}
-      <div className="mt-6 max-w-md mx-auto space-y-4">
-        <h2 className="text-xl font-semibold">Payment</h2>
-
-        <input
-          className="w-full border p-2 rounded"
-          placeholder="Name"
-          value={form.name}
-          onChange={(e) => setForm({ ...form, name: e.target.value })}
-        />
-        <input
-          className="w-full border p-2 rounded"
-          placeholder="Email"
-          value={form.email}
-          onChange={(e) => setForm({ ...form, email: e.target.value })}
-        />
-
-        <div className="flex gap-4">
-          <label>
-            <input
-              type="radio"
-              value="credit-card"
-              checked={paymentMethod === "credit-card"}
-              onChange={(e) => setPaymentMethod(e.target.value)}
-            /> Credit Card
-          </label>
-          <label>
-            <input
-              type="radio"
-              value="upi"
-              checked={paymentMethod === "upi"}
-              onChange={(e) => setPaymentMethod(e.target.value)}
-            /> UPI
-          </label>
-          <label>
-            <input
-              type="radio"
-              value="cod"
-              checked={paymentMethod === "cod"}
-              onChange={(e) => setPaymentMethod(e.target.value)}
-            /> COD
-          </label>
-        </div>
-
-        {/* Dynamic Inputs Based on Payment Method */}
-        {paymentMethod === "credit-card" && (
-          <div className="space-y-2">
-            <input className="w-full border p-2 rounded" placeholder="Card Number" />
-            <input className="w-full border p-2 rounded" placeholder="Expiry (MM/YY)" />
-            <input className="w-full border p-2 rounded" placeholder="CVV" />
-          </div>
-        )}
-        {paymentMethod === "upi" && (
-          <input className="w-full border p-2 rounded" placeholder="UPI ID (e.g. name@upi)" />
-        )}
-        {paymentMethod === "cod" && (
-          <p className="text-green-600">Cash will be collected at delivery.</p>
-        )}
-
-        <div className="text-lg font-bold">
-          Total: ₹{calculateTotal().total.toFixed(2)}
-        </div>
-
+      {/* Buy Button */}
+      <div className="mt-6 text-center">
         <button
-          onClick={handlePayment}
-          className={`w-full py-2 rounded ${processing ? 'bg-gray-400' : 'bg-green-500 hover:bg-green-600'} text-white`}
-          disabled={processing}
+          onClick={() => setShowPaymentForm(true)}
+          className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded"
         >
-          {processing ? "Processing..." : "Complete Payment"}
+          Buy
         </button>
       </div>
+
+      {/* Payment Modal */}
+      {showPaymentForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded shadow-lg max-w-md w-full relative">
+            <button
+              onClick={() => setShowPaymentForm(false)}
+              className="absolute top-2 right-2 text-gray-600 hover:text-black text-lg"
+            >
+              ✕
+            </button>
+
+            <h2 className="text-xl font-semibold mb-4">Payment</h2>
+
+            <input
+              className="w-full border p-2 rounded mb-2"
+              placeholder="Name"
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+            />
+            <input
+              className="w-full border p-2 rounded mb-2"
+              placeholder="Email"
+              value={form.email}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+            />
+
+            <div className="flex gap-4 mb-2">
+              <label>
+                <input
+                  type="radio"
+                  value="credit-card"
+                  checked={paymentMethod === "credit-card"}
+                  onChange={(e) => setPaymentMethod(e.target.value)}
+                /> Credit Card
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  value="upi"
+                  checked={paymentMethod === "upi"}
+                  onChange={(e) => setPaymentMethod(e.target.value)}
+                /> UPI
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  value="cod"
+                  checked={paymentMethod === "cod"}
+                  onChange={(e) => setPaymentMethod(e.target.value)}
+                /> COD
+              </label>
+            </div>
+
+            {paymentMethod === "credit-card" && (
+              <div className="space-y-2 mb-2">
+                <input className="w-full border p-2 rounded" placeholder="Card Number" />
+                <input className="w-full border p-2 rounded" placeholder="Expiry (MM/YY)" />
+                <input className="w-full border p-2 rounded" placeholder="CVV" />
+              </div>
+            )}
+            {paymentMethod === "upi" && (
+              <input className="w-full border p-2 rounded mb-2" placeholder="UPI ID (e.g. name@upi)" />
+            )}
+            {paymentMethod === "cod" && (
+              <p className="text-green-600 mb-2">Cash will be collected at delivery.</p>
+            )}
+
+            <div className="text-lg font-bold mb-2">
+              Total: ₹{calculateTotal().total.toFixed(2)}
+            </div>
+
+            <button
+              onClick={handlePayment}
+              className={`w-full py-2 rounded ${processing ? 'bg-gray-400' : 'bg-green-500 hover:bg-green-600'} text-white`}
+              disabled={processing}
+            >
+              {processing ? "Processing..." : "Complete Payment"}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
