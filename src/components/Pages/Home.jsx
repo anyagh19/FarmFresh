@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import productService from '../../Appwrite/Product';
 import ProductCard from '../ui/ProductCard';
 
@@ -15,50 +16,95 @@ function Home() {
         { name: 'Others' }
     ];
 
+    const location = useLocation();
+    const [address, setAddress] = useState(location.state?.address || {});
     const [products, setProducts] = useState([]);
-    const [selectedCategory, setSelectedCategory] = useState('All');  // Track selected category
+    const [selectedCategory, setSelectedCategory] = useState('All');
 
-    useEffect(() => {
-        const fetchProducts = async () => {
-            try {
-                const res = await productService.listAllProducts();
-                if (res.documents && res.documents.length > 0) {
-                    setProducts(res.documents);
-                } else {
-                    setProducts([]);
-                }
-            } catch (error) {
-                console.log('home fetch pro error', error);
-            }
-        };
-        fetchProducts();
-    }, []);
-
-    const listCategory = async (category) => {
+    // Fetch products based on address pincode
+   // Fetch products based on address pincode
+useEffect(() => {
+    const fetchProductsByPincode = async () => {
         try {
-            if (category === 'All') {
-                const res = await productService.listAllProducts();
-                if (res.documents && res.documents.length > 0) {
-                    setProducts(res.documents);
-                }
+            const res = await productService.listAllProducts();
+
+            if (res.documents) {
+                const filteredProducts = res.documents.filter((product) => {
+                    try {
+                        const pickUpAddress = typeof product.pickUpAddress === 'string'
+                            ? JSON.parse(product.pickUpAddress)
+                            : product.pickUpAddress;
+
+                        // Log the actual address of each filtered product
+                        console.log("Product Address:", pickUpAddress);
+                        console.log("Selected Address:", address);
+
+                        return pickUpAddress?.pincode === address.pincode;
+                    } catch (error) {
+                        console.error('Error parsing pickUpAddress:', error);
+                        return false;
+                    }
+                });
+
+                setProducts(filteredProducts);
             } else {
-                const res = await productService.listProductsByCategory(category);
-                if (res.documents && res.documents.length > 0) {
-                    setProducts(res.documents);
-                } else {
-                    setProducts([]);
-                }
+                setProducts([]);
             }
         } catch (error) {
-            console.log('home cate error', error);
+            console.error('Error fetching products by pincode:', error);
+            setProducts([]);
         }
     };
 
+    if (address.pincode) {
+        fetchProductsByPincode();
+    }
+}, [address]);
+
+    
+    // Sync address with location state
+    useEffect(() => {
+        const newAddress = location.state?.address || {};
+        if (JSON.stringify(address) !== JSON.stringify(newAddress)) {
+            setAddress(newAddress);
+        }
+    }, [location.state]);
+   
+
+    // Filter products by selected category
+    const listCategory = async (category) => {
+        try {
+            let res;
+            if (category === 'All') {
+                res = await productService.listAllProducts();
+            } else {
+                res = await productService.listProductsByCategory(category);
+            }
+
+            if (res.documents && res.documents.length > 0) {
+                setProducts(res.documents);
+            } else {
+                setProducts([]);
+            }
+        } catch (error) {
+            console.error('Error fetching category products:', error);
+        }
+    };
+
+    // Handle category change
     const handleCategoryChange = (event) => {
         const category = event.target.value;
         setSelectedCategory(category);
         listCategory(category);
     };
+
+    // Handle address change from location
+    useEffect(() => {
+        const newAddress = location.state?.address || {};
+        if (JSON.stringify(address) !== JSON.stringify(newAddress)) {
+            setAddress(newAddress);
+        }
+    }, [location.state]);
 
     return (
         <div className='flex flex-col min-h-screen'>
@@ -91,6 +137,13 @@ function Home() {
                     </div>
                 ))}
             </div>
+
+            {/* Show message if no products are found */}
+            {products.length === 0 && (
+                <div className='text-center text-gray-500 my-10'>
+                    No products found for the selected location.
+                </div>
+            )}
         </div>
     );
 }

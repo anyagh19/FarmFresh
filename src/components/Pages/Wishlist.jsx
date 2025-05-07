@@ -62,7 +62,7 @@ function Wishlist() {
             </div>
           ))
         ) : (
-          <p className="text-center col-span-full text-gray-500 font-semibold">No orders found.</p>
+          <p className="text-center col-span-full text-gray-500 font-semibold">No wish found.</p>
         )}
       </div>
     </div>

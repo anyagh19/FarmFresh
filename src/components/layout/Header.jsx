@@ -98,17 +98,17 @@ function Header() {
 
   const menus = [
     // { name: 'Profile', link: '/profile', active: isLoggedIn, },
-    { name: 'Orders', link: '/orders', active: isLoggedIn, },
-    { name: 'Cart', link: '/cart', active: isLoggedIn, },
-    { name: 'WishList', link: '/wishlist', active: isLoggedIn, },
-    { name: 'Community', link: '/community', active: isLoggedIn, },
+    { name: 'Orders', link: '/orders', active: isLoggedIn && role === 'Farmer' || role === 'User' },
+    { name: 'Cart', link: '/cart', active: isLoggedIn && role === 'Farmer' || role === 'User' , },
+    { name: 'WishList', link: '/wishlist', active: isLoggedIn && role === 'Farmer' || role === 'User' , },
+    { name: 'Community', link: '/community', active: isLoggedIn && role === 'Farmer' || role === 'User' , },
     { name: 'Admin', link: '/admin', active: isLoggedIn && role === 'admin', },
     { name: 'Add Product', link: '/add-product', active: isLoggedIn && role === 'Farmer', },
     { name: "My Products", link: '/my-products', active: isLoggedIn && role === 'Farmer' },
     { name: "Weather", link: '/weather', active: isLoggedIn && role === 'Farmer' },
     { name: "Market", link: 'https://agmarknet.gov.in/', active: isLoggedIn && role === 'Farmer', external: true },
-    { name: 'Logout', link: '/', active: isLoggedIn, logout: true },
-    { name: 'Login', link: '/login', active: !isLoggedIn, },
+    // { name: 'Logout', link: '/', active: isLoggedIn, logout: true },
+    // { name: 'Login', link: '/login', active: !isLoggedIn, },
   ];
 
   const handleLogout = async () => {
@@ -149,7 +149,11 @@ function Header() {
         </div>
 
         <div className="flex flex-col md:flex-row gap-2 md:gap-5 text-sm md:text-base">
-          <Link to='/home' className="md:border-r md:pr-4">
+          <Link
+            to="/home"
+            state={{ address }}
+            className="md:border-r md:pr-4"
+          >
             <h2>Home</h2>
           </Link>
           <Link to='/services' className="md:border-r md:pr-4">
@@ -270,13 +274,19 @@ function Header() {
               {/* Submit */}
               <button
                 onClick={() => {
-                  console.log("Final Address:", address);
-                  setOpen2(false);
+                  if (address.pincode && address.village) {
+                    console.log("Final Address:", address);
+                    setOpen2(false);
+                    navigate("/home", { state: { address } });
+                  } else {
+                    alert("Please complete the address details before saving.");
+                  }
                 }}
                 className='bg-purple-500 text-white py-2 px-4 rounded hover:bg-purple-600 transition-all mt-2'
               >
                 Save Address
               </button>
+
               <button
                 onClick={() => setShowMap(!showMap)}
                 className="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 transition-all"
@@ -393,43 +403,18 @@ function Header() {
             </div>
 
             {open && (
-              <div
-                ref={menuref}
-                className="absolute top-12 right-0 py-3 px-6 bg-white shadow-lg rounded-lg w-40 z-50"
-              >
-                <ul className='cursor-pointer'>
-                  {isLoggedIn ? (
-                    <>
-                      {menus.map((menu, index) => (
-                        menu.active && (
-                          <li key={index} onClick={() => setOpen(false)} className="mt-2">
-                            {menu.logout ? (
-                              <button
-                                className="bg-red-400 py-2 px-4 rounded-full w-full"
-                                onClick={handleLogout}
-                              >
-                                Logout
-                              </button>
-                            ) : (
-
-                              null
-                            )}
-                          </li>
-                        )
-                      ))}
-                    </>
-                  ) : (
-                    <li>
-                      <Link to="/login" onClick={() => setOpen(false)}>
-                        <button className="bg-purple-500 text-white py-2 px-4 rounded-full w-full">
-                          Login
-                        </button>
-                      </Link>
-                    </li>
-                  )}
-                </ul>
-              </div>
-            )}
+          <div ref={menuref} className="absolute top-12 right-0 py-3 px-6 bg-white shadow-lg rounded-lg w-40 z-50">
+            <ul className='cursor-pointer'>
+              {isLoggedIn ? (
+                <li onClick={handleLogout} className="bg-red-400 py-2 px-4 rounded-full text-center text-white">Logout</li>
+              ) : (
+                <Link to="/login" onClick={() => setOpenProfile(false)}>
+                  <li className="bg-purple-500 py-2 px-4 rounded-full text-center text-white">Login</li>
+                </Link>
+              )}
+            </ul>
+          </div>
+        )}
           </div>
 
           {/* Cart */}

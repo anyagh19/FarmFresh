@@ -46,9 +46,8 @@ function Cart() {
     const subtotal = cartProducts.reduce((total, item) => total + parseFloat(item.price), 0);
     return {
       subtotal,
-      delivery: 50,
-      tax: 20,
-      total: subtotal + 50 + 20
+     
+      total: subtotal 
     };
   };
 

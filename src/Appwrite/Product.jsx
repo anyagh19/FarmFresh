@@ -1,4 +1,4 @@
-import { Client , Databases , ID , Storage , Query } from "appwrite";
+import { Client, Databases, ID, Storage, Query } from "appwrite";
 import conf from "../conf/conf";
 
 export class ProductService {
@@ -6,7 +6,7 @@ export class ProductService {
     database
     bucket
 
-    constructor(){
+    constructor() {
         this.client
             .setEndpoint(conf.appwriteEndpoint)
             .setProject(conf.appwriteProjectID)
@@ -15,18 +15,18 @@ export class ProductService {
         this.bucket = new Storage(this.client)
     }
 
-    async listAllProducts(){
+    async listAllProducts() {
         try {
             return await this.database.listDocuments(
                 conf.appwriteDatabaseID,
                 conf.appwriteProductsCollectionID
             )
         } catch (error) {
-            console.log('list all pro error' , error)
+            console.log('list all pro error', error)
         }
     }
 
-    async listProductsByCategory(category){
+    async listProductsByCategory(category) {
         try {
             return await this.database.listDocuments(
                 conf.appwriteDatabaseID,
@@ -54,7 +54,7 @@ export class ProductService {
         }
     }
 
-    async addToCart({productID , userID , name , photo , price , }){
+    async addToCart({ productID, userID, name, photo, price, }) {
         try {
             return this.database.createDocument(
                 conf.appwriteDatabaseID,
@@ -66,15 +66,15 @@ export class ProductService {
                     name,
                     price,
                     photo,
-                    
+
                 }
             )
         } catch (error) {
-            console.log('add cart error' , error)
+            console.log('add cart error', error)
         }
     }
 
-    async removeFromCart(productID){
+    async removeFromCart(productID) {
         try {
             return await this.database.deleteDocument(
                 conf.appwriteDatabaseID,
@@ -86,19 +86,19 @@ export class ProductService {
         }
     }
 
-    async getCartProducts(userID){
+    async getCartProducts(userID) {
         try {
             return this.database.listDocuments(
                 conf.appwriteDatabaseID,
                 conf.appwriteCartCollectionID,
-                [Query.equal('userID' , userID)]
+                [Query.equal('userID', userID)]
             )
         } catch (error) {
             console.log('get cart errror', error)
         }
     }
 
-    async removeAllCartProduct(userID){
+    async removeAllCartProduct(userID) {
         try {
             const item = await this.database.listDocuments(
                 conf.appwriteDatabaseID,
@@ -116,7 +116,7 @@ export class ProductService {
         }
     }
 
-    async addToOrders({productID , userID , name , price , photo , address , }){
+    async addToOrders({ productID, userID, name, price, photo, address, }) {
         try {
             return await this.database.createDocument(
                 conf.appwriteDatabaseID,
@@ -129,74 +129,74 @@ export class ProductService {
                     photo,
                     price,
                     address,
-                    
+
                 }
             )
         } catch (error) {
-            console.log("add to ord error" , error)
+            console.log("add to ord error", error)
         }
     }
 
-    async getOrder(userID){
+    async getOrder(userID) {
         try {
             return this.database.listDocuments(
                 conf.appwriteDatabaseID,
                 conf.appwriteOrdersCollectionID,
-                [Query.equal('userID' , userID)]
+                [Query.equal('userID', userID)]
             )
         } catch (error) {
-            console.log('get ord error' ,error)
+            console.log('get ord error', error)
         }
     }
 
     async removeOrder({ productID, userID }) {
         try {
-          const items = await this.database.listDocuments(
-            conf.appwriteDatabaseID,
-            conf.appwriteOrdersCollectionID,
-            [
-              Query.equal('productID', productID),
-              Query.equal('userID', userID),
-            ]
-          )
-      
-          await Promise.all(
-            items.documents.map(item =>
-              this.database.deleteDocument(
+            const items = await this.database.listDocuments(
                 conf.appwriteDatabaseID,
                 conf.appwriteOrdersCollectionID,
-                item.$id
-              )
+                [
+                    Query.equal('productID', productID),
+                    Query.equal('userID', userID),
+                ]
             )
-          )
-      
-          return true // ✅ Return success
+
+            await Promise.all(
+                items.documents.map(item =>
+                    this.database.deleteDocument(
+                        conf.appwriteDatabaseID,
+                        conf.appwriteOrdersCollectionID,
+                        item.$id
+                    )
+                )
+            )
+
+            return true // ✅ Return success
         } catch (error) {
-          console.log('del ord err', error)
-          return false // ✅ Return failure
+            console.log('del ord err', error)
+            return false // ✅ Return failure
         }
-      }
-      
-      async searchProduct(queryText){
+    }
+
+    async searchProduct(queryText) {
         try {
             const response = await this.database.listDocuments(
-              conf.appwriteDatabaseID,
-              conf.appwriteProductsCollectionID,
-              [
-                Query.or([
-                  Query.startsWith("name", queryText),
-                  Query.startsWith("category", queryText),
-                ])
-              ]
+                conf.appwriteDatabaseID,
+                conf.appwriteProductsCollectionID,
+                [
+                    Query.or([
+                        Query.startsWith("name", queryText),
+                        Query.startsWith("category", queryText),
+                    ])
+                ]
             );
             return response.documents;
-          } catch (error) {
+        } catch (error) {
             console.log("Search error", error);
             return [];
-          }
-      }
+        }
+    }
 
-      async addToWishlist({productID , userID , name , price , photo}){
+    async addToWishlist({ productID, userID, name, price, photo }) {
         try {
             return await this.database.createDocument(
                 conf.appwriteDatabaseID,
@@ -205,43 +205,43 @@ export class ProductService {
                 {
                     productID,
                     userID,
-                    name, 
-                    photo , 
+                    name,
+                    photo,
                     price
                 }
             )
         } catch (error) {
             console.log(error)
         }
-      }
+    }
 
-      async getWish(userID){
+    async getWish(userID) {
         try {
             return await this.database.listDocuments(
                 conf.appwriteDatabaseID,
                 conf.appwriteWishlistCollectionID,
-                [Query.equal('userID' , userID)]
+                [Query.equal('userID', userID)]
             )
         } catch (error) {
-            console.log('get ord error' ,error)
+            console.log('get ord error', error)
         }
     }
 
     async deleteWishlistById(documentID) {
         try {
-          return await this.database.deleteDocument(
-            conf.appwriteDatabaseID,
-            conf.appwriteWishlistCollectionID,
-            documentID
-          )
+            return await this.database.deleteDocument(
+                conf.appwriteDatabaseID,
+                conf.appwriteWishlistCollectionID,
+                documentID
+            )
         } catch (error) {
-          console.log('deleteWishlistById error:', error)
-          return null
+            console.log('deleteWishlistById error:', error)
+            return null
         }
-      }
-      
-    
-      async addReview({productID , userID , rate , view}){
+    }
+
+
+    async addReview({ productID, userID, rate, view }) {
         try {
             return this.database.createDocument(
                 conf.appwriteDatabaseID,
@@ -257,9 +257,9 @@ export class ProductService {
         } catch (error) {
             console.log(error)
         }
-      }
+    }
 
-      async getReviews(productID){
+    async getReviews(productID) {
         try {
             return this.database.listDocuments(
                 conf.appwriteDatabaseID,
@@ -271,9 +271,9 @@ export class ProductService {
         } catch (error) {
             console.log(error)
         }
-      }
+    }
 
-      async listOrders(){
+    async listOrders() {
         try {
             return this.database.listDocuments(
                 conf.appwriteDatabaseID,
@@ -282,7 +282,30 @@ export class ProductService {
         } catch (error) {
             console.log(error)
         }
-      }
+    }
+
+    async listProductsByPincode(address) {
+        try {
+            const pincode = address?.pincode;  // Extract pincode from the address object
+    
+            if (!pincode) {
+                throw new Error("Pincode is missing from address");
+            }
+    
+            console.log("Fetching products for pincode:", pincode); // Log the pincode
+    
+            return await this.database.listDocuments(
+                conf.appwriteDatabaseID,
+                conf.appwriteProductsCollectionID,
+                [Query.equal('pincode', String(pincode))]  // Make sure it's a string
+            );
+        } catch (error) {
+            console.log('list by pincode error', error);
+        }
+    }
+    
+    
+
 }
 
 

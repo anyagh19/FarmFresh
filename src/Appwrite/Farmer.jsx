@@ -232,6 +232,29 @@ export class FarmerService{
         }
     }
     
+    async getCurrentUserAddress() {
+        try {
+            // Fetch the current user
+            const user = await this.account.get();
+
+            if (!user) {
+                throw new Error("No user is logged in");
+            }
+
+            // Fetch the farmer document based on the user ID
+            const farmer = await this.getFarmerById(user.$id);
+
+            if (!farmer) {
+                throw new Error("No farmer found for this user");
+            }
+
+            // Return the address from the farmer's document
+            return farmer.address;
+        } catch (error) {
+            console.error("Error fetching current user address:", error);
+            throw error;
+        }
+    }
 }
 
 
