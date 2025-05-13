@@ -54,12 +54,20 @@ function Orders() {
                 photo={product.photo}
                 price={product.price}
               />
+              <div className=' flex justify-between'>
               <button
                 onClick={() => cancelOrder(product.$id)}
                 className="px-3 py-2 bg-red-300 rounded-lg font-medium mt-2"
               >
-                Cancel Order
+                Cancel
               </button>
+              <button
+                
+                className="px-3 py-2 bg-yellow-300 rounded-lg font-medium mt-2"
+              >
+                track
+              </button>
+              </div>
             </div>
           ))
         ) : (
