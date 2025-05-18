@@ -5,7 +5,6 @@ import userService from '../../Appwrite/Customer';
 import ProductCard from '../ui/ProductCard';
 import { toast } from 'react-toastify';
 
-// Replace with your Razorpay key
 const RAZORPAY_KEY_ID = 'rzp_test_kxwK4KltT9lbKS';
 
 function Cart() {
@@ -17,7 +16,6 @@ function Cart() {
   const [paymentMethod, setPaymentMethod] = useState(null);
   const [form, setForm] = useState({ name: '', email: '' });
   const [processing, setProcessing] = useState(false);
-  const [showPaymentForm, setShowPaymentForm] = useState(false);
 
   useEffect(() => {
     const fetchCart = async () => {
@@ -81,16 +79,29 @@ function Cart() {
             price: item.price,
             photo: item.photo,
             address: JSON.stringify(address),
+            paymentMethod: paymentMethod || 'Online',
           })
         )
       );
       await productService.removeAllCartProduct(uID);
       setCartProducts([]);
       toast.success('🎉 Payment Successful!', { position: 'top-center' });
-      setShowPaymentForm(false);
     } catch (error) {
       console.error('Payment processing error', error);
       toast.error('Payment Failed. Try again!');
+    }
+  };
+
+  const handleCOD = async () => {
+    try {
+      setProcessing(true);
+      await handlePaymentSuccess();
+      toast.success('🎉 Order Placed Successfully (Cash on Delivery)', { position: 'top-center' });
+      setProcessing(false);
+    } catch (error) {
+      console.error('COD order error:', error);
+      toast.error('Order failed. Try again!');
+      setProcessing(false);
     }
   };
 
@@ -161,69 +172,34 @@ function Cart() {
         </button>
       </div>
 
-      {/* Address Form */}
-      {open && (
-        <div className="mt-4 space-y-3 px-2">
-          <input
-            type="text"
-            placeholder="Enter Pincode"
-            className="w-full border p-2 rounded"
-            onChange={async (e) => {
-              const pin = e.target.value;
-              setAddress((prev) => ({ ...prev, pincode: pin }));
-
-              if (pin.length === 6) {
-                try {
-                  const res = await fetch(`https://api.postalpincode.in/pincode/${pin}`);
-                  const data = await res.json();
-                  const postOffices = data[0]?.PostOffice || [];
-
-                  if (postOffices.length > 0) {
-                    const { State, District, Block } = postOffices[0];
-                    const villageList = postOffices.map((po) => po.Name);
-                    setVillages(villageList);
-                    setAddress((prev) => ({
-                      ...prev,
-                      state: State,
-                      district: District,
-                      taluka: Block,
-                    }));
-                  }
-                } catch (err) {
-                  console.error("Failed to fetch location:", err);
-                }
-              } else {
-                setVillages([]);
-              }
-            }}
-          />
-          {villages.length > 0 && (
-            <select
-              className="w-full border p-2 rounded"
-              onChange={(e) => setAddress((prev) => ({ ...prev, village: e.target.value }))}
-            >
-              <option value="">Select Village</option>
-              {villages.map((v, i) => (
-                <option key={i} value={v}>{v}</option>
-              ))}
-            </select>
-          )}
-          <textarea
-            placeholder="Enter Local Address"
-            className="w-full border p-2 rounded"
-            onChange={(e) => setAddress((prev) => ({ ...prev, localAddress: e.target.value }))}
-          />
-          <button onClick={() => setOpen(false)} className="bg-green-500 text-white py-2 px-4 rounded">
-            Save Address
-          </button>
-        </div>
-      )}
+      {/* Payment Method Selection */}
+      <div className="mt-6 text-center">
+        <h3 className="text-xl font-semibold mb-4">Select Payment Method:</h3>
+        <button 
+          onClick={() => setPaymentMethod('COD')}
+          className={`px-6 py-2 rounded mb-4 ${paymentMethod === 'COD' ? 'bg-green-500 text-white' : 'bg-gray-200'}`}
+        >
+          Cash on Delivery
+        </button>
+        <button 
+          onClick={() => setPaymentMethod('Online')}
+          className={`px-6 py-2 rounded ${paymentMethod === 'Online' ? 'bg-green-500 text-white' : 'bg-gray-200'}`}
+        >
+          Online Payment
+        </button>
+      </div>
 
       {/* Buy Button */}
       <div className="mt-6 text-center">
-        <button onClick={handleRazorpayPayment} className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded">
-          Buy Now
-        </button>
+        {paymentMethod === 'COD' ? (
+          <button onClick={handleCOD} disabled={processing} className="bg-green-500 text-white px-6 py-2 rounded">
+            {processing ? 'Processing...' : 'Place Order (COD)'}
+          </button>
+        ) : (
+          <button onClick={handleRazorpayPayment} className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded">
+            Pay Now
+          </button>
+        )}
       </div>
     </div>
   );
