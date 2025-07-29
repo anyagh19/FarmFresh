@@ -26,7 +26,7 @@ function LoginForm() {
           const role = userData.prefs?.role || 'user'; // or wherever you store role in Appwrite
           dispatch(storelogin({ userData, role }));
           toast.success('🎉 Login successful', { position: 'top-center' });
-          navigate('/'); // 
+          navigate('/'); 
         }
       }
     } catch (error) {
