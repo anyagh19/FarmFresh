@@ -105,17 +105,7 @@ Now visit [farm-fresh-topaz.vercel.app
 
 ---
 
-## Demo
 
-Screenshots or animated demo here! *(Add if available.)*
-
----
-
-## Contributing
-
-Contributions are welcome! Please fork, work on a feature branch, and open a pull request.
-
----
 
 
 
